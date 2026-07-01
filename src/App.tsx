@@ -373,7 +373,7 @@ function TextInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
       inputMode={inputMode ?? (isNumberInput ? 'decimal' : undefined)}
       onFocus={handleFocus}
       className={cn(
-        'h-12 w-full rounded-2xl border border-[#252525] bg-[#0A0A0A] px-4 text-base text-white outline-none transition placeholder:text-[#636366] focus:border-[#3A3A3C]',
+        'h-12 min-w-0 max-w-full w-full rounded-2xl border border-[#252525] bg-[#0A0A0A] px-4 text-base text-white outline-none transition placeholder:text-[#636366] focus:border-[#3A3A3C]',
         className,
       )}
     />
@@ -385,7 +385,7 @@ function SelectInput(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
     <select
       {...props}
       className={cn(
-        'h-12 w-full rounded-2xl border border-[#252525] bg-[#0A0A0A] px-4 text-base text-white outline-none transition focus:border-[#3A3A3C]',
+        'h-12 min-w-0 max-w-full w-full rounded-2xl border border-[#252525] bg-[#0A0A0A] px-4 text-base text-white outline-none transition focus:border-[#3A3A3C]',
         props.className,
       )}
     />
@@ -397,7 +397,7 @@ function TextArea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
     <textarea
       {...props}
       className={cn(
-        'w-full resize-none rounded-2xl border border-[#252525] bg-[#0A0A0A] px-4 py-3 text-base text-white outline-none transition placeholder:text-[#636366] focus:border-[#3A3A3C]',
+        'min-w-0 max-w-full w-full resize-none rounded-2xl border border-[#252525] bg-[#0A0A0A] px-4 py-3 text-base text-white outline-none transition placeholder:text-[#636366] focus:border-[#3A3A3C]',
         props.className,
       )}
     />
@@ -703,7 +703,7 @@ export default function App() {
 
         <Panel className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2">
-            <div className="space-y-2">
+            <div className="min-w-0 space-y-2">
               <FieldLabel>日期</FieldLabel>
               <TextInput
                 type="date"
@@ -713,7 +713,7 @@ export default function App() {
                 }
               />
             </div>
-            <div className="space-y-2">
+            <div className="min-w-0 space-y-2">
               <FieldLabel>类型</FieldLabel>
               <SelectInput
                 value={todayWorkout.type}
