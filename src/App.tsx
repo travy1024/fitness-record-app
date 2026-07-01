@@ -355,20 +355,26 @@ function IconButton({
 }
 
 function TextInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
+  const { className, inputMode, onFocus, type, ...rest } = props;
+  const isNumberInput = type === 'number';
+
   const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => {
-    if (props.type === 'number' && event.currentTarget.value === '0') {
-      event.currentTarget.select();
+    if (isNumberInput && event.currentTarget.value === '0') {
+      const input = event.currentTarget;
+      window.requestAnimationFrame(() => input.select());
     }
-    props.onFocus?.(event);
+    onFocus?.(event);
   };
 
   return (
     <input
-      {...props}
+      {...rest}
+      type={isNumberInput ? 'text' : type}
+      inputMode={inputMode ?? (isNumberInput ? 'decimal' : undefined)}
       onFocus={handleFocus}
       className={cn(
         'h-12 w-full rounded-2xl border border-[#252525] bg-[#0A0A0A] px-4 text-base text-white outline-none transition placeholder:text-[#636366] focus:border-[#3A3A3C]',
-        props.className,
+        className,
       )}
     />
   );
