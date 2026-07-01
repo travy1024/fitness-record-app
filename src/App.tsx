@@ -355,9 +355,17 @@ function IconButton({
 }
 
 function TextInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
+  const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => {
+    if (props.type === 'number' && event.currentTarget.value === '0') {
+      event.currentTarget.select();
+    }
+    props.onFocus?.(event);
+  };
+
   return (
     <input
       {...props}
+      onFocus={handleFocus}
       className={cn(
         'h-12 w-full rounded-2xl border border-[#252525] bg-[#0A0A0A] px-4 text-base text-white outline-none transition placeholder:text-[#636366] focus:border-[#3A3A3C]',
         props.className,
@@ -688,7 +696,7 @@ export default function App() {
         </Panel>
 
         <Panel className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-2">
               <FieldLabel>日期</FieldLabel>
               <TextInput
