@@ -85,12 +85,12 @@ type TrendPoint = {
 };
 
 const navItems = [
-  { key: 'today', label: 'Today', icon: CalendarDays },
-  { key: 'record', label: 'Log', icon: Dumbbell },
-  { key: 'history', label: 'History', icon: History },
-  { key: 'library', label: 'Library', icon: Library },
-  { key: 'analytics', label: 'Trends', icon: LineChart },
-  { key: 'templates', label: 'Plans', icon: LayoutTemplate },
+  { key: 'today', label: '今日', icon: CalendarDays },
+  { key: 'record', label: '记录', icon: Dumbbell },
+  { key: 'history', label: '历史', icon: History },
+  { key: 'library', label: '动作库', icon: Library },
+  { key: 'analytics', label: '趋势', icon: LineChart },
+  { key: 'templates', label: '模板', icon: LayoutTemplate },
 ] satisfies Array<{ key: TabKey; label: string; icon: typeof CalendarDays }>;
 
 const movementLabels: Record<MovementType, string> = {
@@ -104,13 +104,13 @@ const movementLabels: Record<MovementType, string> = {
 };
 
 const workoutLabels: Record<WorkoutType, string> = {
-  胸: 'Chest Day',
-  背: 'Back Day',
-  肩: 'Shoulders',
-  腿: 'Leg Day',
-  臂: 'Arms',
-  休息: 'Rest Day',
-  自定义: 'Custom Day',
+  胸: '胸日',
+  背: '背日',
+  肩: '肩日',
+  腿: '腿日',
+  臂: '臂日',
+  休息: '休息日',
+  自定义: '自定义训练',
 };
 
 const emptyExerciseDraft: ExerciseDraft = {
@@ -150,11 +150,11 @@ function dateFromISO(date: string) {
 }
 
 function weekday(date: string) {
-  return dateFromISO(date).toLocaleDateString('en-US', { weekday: 'long' });
+  return dateFromISO(date).toLocaleDateString('zh-CN', { weekday: 'long' });
 }
 
 function fullDate(date: string) {
-  return dateFromISO(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return dateFromISO(date).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
 }
 
 function convertWeight(weight: number, from: Unit, to: Unit) {
@@ -220,7 +220,7 @@ function matchWorkoutExercise(entry: WorkoutExercise, exercise: Exercise) {
 }
 
 function summarizeExercise(entry: WorkoutExercise, unit: Unit) {
-  if (!entry.sets.length) return 'No sets yet';
+  if (!entry.sets.length) return '暂无组';
   const best = entry.sets.reduce((current, set) =>
     estimatedOneRM(set, unit) > estimatedOneRM(current, unit) ? set : current,
   );
@@ -597,7 +597,7 @@ export default function App() {
     anchor.download = `iron-ledger-backup-${todayISO()}.json`;
     anchor.click();
     URL.revokeObjectURL(url);
-    setBackupMessage('Backup file exported.');
+    setBackupMessage('备份文件已导出。');
   };
 
   const importBackup = async (file?: File) => {
@@ -606,13 +606,13 @@ export default function App() {
       const parsed = JSON.parse(await file.text()) as unknown;
       const nextData = normalizeBackup(parsed);
       if (!nextData) throw new Error('Invalid backup');
-      if (!window.confirm('Importing this file will replace the data saved in this browser. Continue?')) return;
+      if (!window.confirm('导入后会替换这个浏览器里当前保存的数据。继续吗？')) return;
       setData(nextData);
       const nextWorkout = nextData.workouts.find((workout) => workout.date === todayISO()) ?? nextData.workouts[0];
       setSelectedWorkoutId(nextWorkout?.id ?? '');
-      setBackupMessage(`Imported ${nextData.workouts.length} workouts.`);
+      setBackupMessage(`已导入 ${nextData.workouts.length} 条训练记录。`);
     } catch {
-      setBackupMessage('Import failed. Please choose an Iron Ledger backup JSON file.');
+      setBackupMessage('导入失败，请选择 Iron Ledger 的备份 JSON 文件。');
     }
   };
 
@@ -635,7 +635,7 @@ export default function App() {
                       <div className="min-w-0 flex-1">
                         <div className="truncate text-[17px] font-medium text-white">{entry.name}</div>
                         <div className="mt-1 text-sm text-[#8E8E93]">
-                          {last ? `Last ${last.summary}` : entry.primaryMuscle}
+                          {last ? `上次 ${last.summary}` : entry.primaryMuscle}
                         </div>
                       </div>
                       <div className="flex gap-1">
@@ -671,7 +671,7 @@ export default function App() {
                 );
               })
             ) : (
-              <div className="py-8 text-center text-sm text-[#8E8E93]">Choose a template or add an exercise.</div>
+              <div className="py-8 text-center text-sm text-[#8E8E93]">选择模板或手动添加动作。</div>
             )}
           </div>
           <Button
@@ -683,14 +683,14 @@ export default function App() {
             }}
           >
             <Play size={17} />
-            Start Workout
+            开始训练
           </Button>
         </Panel>
 
         <Panel className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <FieldLabel>Date</FieldLabel>
+              <FieldLabel>日期</FieldLabel>
               <TextInput
                 type="date"
                 value={todayWorkout.date}
@@ -700,7 +700,7 @@ export default function App() {
               />
             </div>
             <div className="space-y-2">
-              <FieldLabel>Type</FieldLabel>
+              <FieldLabel>类型</FieldLabel>
               <SelectInput
                 value={todayWorkout.type}
                 onChange={(event) =>
@@ -719,7 +719,7 @@ export default function App() {
             </div>
           </div>
           <div className="space-y-2">
-            <FieldLabel>Template</FieldLabel>
+            <FieldLabel>模板</FieldLabel>
             <div className="grid grid-cols-[1fr_auto] gap-2">
               <SelectInput value={templateChoice} onChange={(event) => setTemplateChoice(event.target.value)}>
                 {data.templates.map((template) => (
@@ -728,11 +728,11 @@ export default function App() {
                   </option>
                 ))}
               </SelectInput>
-              <Button onClick={applyTemplateToToday}>Use</Button>
+              <Button onClick={applyTemplateToToday}>使用</Button>
             </div>
           </div>
           <div className="space-y-2">
-            <FieldLabel>Add Exercise</FieldLabel>
+            <FieldLabel>添加动作</FieldLabel>
             <div className="grid grid-cols-[1fr_auto] gap-2">
               <SelectInput value={exerciseChoice} onChange={(event) => setExerciseChoice(event.target.value)}>
                 {visibleExercises.map((exercise) => (
@@ -743,7 +743,7 @@ export default function App() {
               </SelectInput>
               <Button onClick={() => addExerciseToWorkout(todayWorkout.id, exerciseChoice)}>
                 <Plus size={16} />
-                Add
+                添加
               </Button>
             </div>
           </div>
@@ -772,18 +772,18 @@ export default function App() {
               className="inline-flex items-center gap-1.5 rounded-full text-sm font-medium text-white"
             >
               <Check size={16} />
-              {selectedWorkout.completed ? 'Done' : 'Finish'}
+              {selectedWorkout.completed ? '已完成' : '完成训练'}
             </button>
           </div>
           <div className="mt-4 flex gap-8">
-            <NumberStat label="Sets" value={`${totals.totalSets}`} />
-            <NumberStat label="Volume" value={`${fmt(totals.volume)} lb`} />
+            <NumberStat label="组数" value={`${totals.totalSets}`} />
+            <NumberStat label="容量" value={`${fmt(totals.volume)} lb`} />
           </div>
         </div>
 
         {selectedWorkout.exercises.length === 0 ? (
           <Panel>
-            <p className="text-sm text-[#8E8E93]">No exercises yet. Add them from Today.</p>
+            <p className="text-sm text-[#8E8E93]">还没有动作，请从今日训练添加。</p>
           </Panel>
         ) : (
           selectedWorkout.exercises.map((entry) => {
@@ -793,8 +793,8 @@ export default function App() {
                 <div>
                   <h2 className="text-[22px] font-semibold tracking-[-0.03em] text-white">{entry.name}</h2>
                   <div className="mt-3 grid grid-cols-[72px_1fr] gap-4 border-y border-[#252525] py-3">
-                    <div className="text-sm text-[#8E8E93]">Last</div>
-                    <div className="text-right text-[17px] font-medium text-white">{last?.summary ?? 'No history'}</div>
+                    <div className="text-sm text-[#8E8E93]">上次</div>
+                    <div className="text-right text-[17px] font-medium text-white">{last?.summary ?? '暂无记录'}</div>
                   </div>
                 </div>
 
@@ -814,7 +814,7 @@ export default function App() {
                               weight: toNumber(event.target.value),
                             }))
                           }
-                          aria-label="weight"
+                          aria-label="重量"
                         />
                         <SelectInput
                           className="h-13 px-2 text-center"
@@ -825,7 +825,7 @@ export default function App() {
                               unit: event.target.value as Unit,
                             }))
                           }
-                          aria-label="unit"
+                          aria-label="单位"
                         >
                           <option value="lb">lb</option>
                           <option value="kg">kg</option>
@@ -841,7 +841,7 @@ export default function App() {
                               reps: toNumber(event.target.value),
                             }))
                           }
-                          aria-label="reps"
+                          aria-label="次数"
                         />
                         <IconButton
                           label="删除组"
@@ -868,7 +868,7 @@ export default function App() {
                               }))
                             }
                           />
-                          Warm-up
+                          热身组
                         </label>
                         <TextInput
                           className="h-10 w-24 text-center text-sm"
@@ -912,7 +912,7 @@ export default function App() {
                             }
                             className="shrink-0 rounded-full border border-[#252525] px-3 py-1.5 text-xs text-[#D1D1D6]"
                           >
-                            {reps} reps
+                            {reps} 次
                           </button>
                         ))}
                       </div>
@@ -930,18 +930,18 @@ export default function App() {
                     }
                   >
                     <Plus size={16} />
-                    Add Set
+                    添加一组
                   </Button>
                   <Button onClick={() => duplicateLastSet(selectedWorkout.id, entry)}>
                     <Copy size={16} />
-                    Copy Last
+                    复制上一组
                   </Button>
                 </div>
 
                 <TextArea
                   rows={2}
                   value={entry.notes ?? ''}
-                  placeholder="Notes"
+                  placeholder="备注"
                   onChange={(event) =>
                     updateExerciseEntry(selectedWorkout.id, entry.id, (current) => ({
                       ...current,
@@ -970,7 +970,7 @@ export default function App() {
 
     return (
       <div className="screen space-y-5">
-        <PageTitle title="History" subtitle="Edit old workouts, search by exercise, or remove a day." />
+        <PageTitle title="历史记录" subtitle="按日期查看训练，支持搜索动作、筛选类型和修改旧记录。" />
         <Panel className="space-y-3">
           <div className="grid grid-cols-[1fr_126px] gap-2">
             <div className="relative">
@@ -978,12 +978,12 @@ export default function App() {
               <TextInput
                 className="pl-11"
                 value={historySearch}
-                placeholder="Exercise"
+                placeholder="搜索动作"
                 onChange={(event) => setHistorySearch(event.target.value)}
               />
             </div>
             <SelectInput value={historyType} onChange={(event) => setHistoryType(event.target.value as WorkoutType | '全部')}>
-              <option value="全部">All</option>
+              <option value="全部">全部</option>
               {WORKOUT_TYPES.map((type) => (
                 <option key={type} value={type}>
                   {workoutLabels[type]}
@@ -1001,9 +1001,9 @@ export default function App() {
                 <div className="min-w-0">
                   <div className="text-[17px] font-semibold text-white">{fullDate(workout.date)}</div>
                   <div className="mt-1 text-sm text-[#8E8E93]">
-                    {workoutLabels[workout.type]} · {workout.exercises.length} exercises · {totals.totalSets} sets
+                    {workoutLabels[workout.type]} · {workout.exercises.length} 个动作 · {totals.totalSets} 组
                   </div>
-                  <div className="mt-2 text-sm text-[#D1D1D6]">{fmt(totals.volume)} lb volume</div>
+                  <div className="mt-2 text-sm text-[#D1D1D6]">{fmt(totals.volume)} lb 总容量</div>
                 </div>
                 <div className="flex gap-2">
                   <IconButton
@@ -1048,24 +1048,24 @@ export default function App() {
 
     return (
       <div className="screen space-y-5">
-        <PageTitle title="Library" subtitle="Archived exercises stay in history, but disappear from future plans." />
+        <PageTitle title="动作库" subtitle="管理常用动作。删除动作不会影响已经保存的历史训练。" />
         <Panel className="space-y-4">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h2 className="text-[20px] font-semibold tracking-[-0.03em] text-white">Backup</h2>
+              <h2 className="text-[20px] font-semibold tracking-[-0.03em] text-white">备份</h2>
               <p className="mt-2 text-sm leading-6 text-[#8E8E93]">
-                Data stays on this phone and browser. Export before switching phones, clearing browser data, or reinstalling the app.
+                数据保存在这台手机的当前浏览器里。换手机、清理浏览器数据或重新安装前，先导出备份。
               </p>
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button onClick={exportBackup}>
               <Download size={16} />
-              Export Backup
+              导出备份
             </Button>
             <Button onClick={() => backupInputRef.current?.click()}>
               <Upload size={16} />
-              Import Backup
+              导入备份
             </Button>
           </div>
           {backupMessage ? <p className="text-sm text-[#D1D1D6]">{backupMessage}</p> : null}
@@ -1088,12 +1088,12 @@ export default function App() {
               <TextInput
                 className="pl-11"
                 value={librarySearch}
-                placeholder="Search"
+                placeholder="搜索"
                 onChange={(event) => setLibrarySearch(event.target.value)}
               />
             </div>
             <SelectInput value={libraryMuscle} onChange={(event) => setLibraryMuscle(event.target.value)}>
-              <option value="全部">All</option>
+              <option value="全部">全部</option>
               {MUSCLES.map((muscle) => (
                 <option key={muscle} value={muscle}>
                   {muscle}
@@ -1105,12 +1105,12 @@ export default function App() {
 
         <Panel className="space-y-3">
           <h2 className="text-[20px] font-semibold tracking-[-0.03em] text-white">
-            {exerciseDraft.id ? 'Edit Exercise' : 'New Exercise'}
+            {exerciseDraft.id ? '编辑动作' : '新建动作'}
           </h2>
           <div className="grid gap-2 sm:grid-cols-2">
             <TextInput
               value={exerciseDraft.name}
-              placeholder="Name"
+              placeholder="动作名称"
               onChange={(event) => setExerciseDraft((draft) => ({ ...draft, name: event.target.value }))}
             />
             <SelectInput
@@ -1139,26 +1139,26 @@ export default function App() {
               value={exerciseDraft.defaultUnit}
               onChange={(event) => setExerciseDraft((draft) => ({ ...draft, defaultUnit: event.target.value as Unit }))}
             >
-              <option value="lb">Default lb</option>
-              <option value="kg">Default kg</option>
+              <option value="lb">默认 lb</option>
+              <option value="kg">默认 kg</option>
             </SelectInput>
           </div>
           <TextInput
             value={exerciseDraft.secondaryMuscles}
-            placeholder="Secondary muscles, separated by comma"
+            placeholder="次要肌群，用逗号分隔"
             onChange={(event) => setExerciseDraft((draft) => ({ ...draft, secondaryMuscles: event.target.value }))}
           />
           <TextArea
             rows={2}
             value={exerciseDraft.notes}
-            placeholder="Notes"
+            placeholder="备注"
             onChange={(event) => setExerciseDraft((draft) => ({ ...draft, notes: event.target.value }))}
           />
           <div className="flex gap-2">
             <Button variant="primary" onClick={saveExerciseDraft}>
-              {exerciseDraft.id ? 'Save' : 'Add'}
+              {exerciseDraft.id ? '保存' : '添加'}
             </Button>
-            <Button onClick={() => setExerciseDraft(emptyExerciseDraft)}>Clear</Button>
+            <Button onClick={() => setExerciseDraft(emptyExerciseDraft)}>清空</Button>
           </div>
         </Panel>
 
@@ -1208,7 +1208,7 @@ export default function App() {
                   }
                 >
                   <Pencil size={16} />
-                  Edit
+                  编辑
                 </Button>
                 <Button
                   variant="danger"
@@ -1222,7 +1222,7 @@ export default function App() {
                   }
                 >
                   <Trash2 size={16} />
-                  Delete
+                  删除
                 </Button>
               </div>
             </Panel>
@@ -1234,20 +1234,20 @@ export default function App() {
 
   const renderTemplates = () => (
     <div className="screen space-y-5">
-      <PageTitle title="Plans" subtitle="Keep templates simple. Today's workout can be generated from any plan." />
+      <PageTitle title="训练模板" subtitle="把常用训练整理成模板，今日训练可以一键生成。" />
       <Panel className="space-y-3">
         <h2 className="text-[20px] font-semibold tracking-[-0.03em] text-white">
-          {templateDraft.id ? 'Edit Plan' : 'New Plan'}
+          {templateDraft.id ? '编辑模板' : '新建模板'}
         </h2>
         <TextInput
           value={templateDraft.name}
-          placeholder="Name"
+          placeholder="模板名称"
           onChange={(event) => setTemplateDraft((draft) => ({ ...draft, name: event.target.value }))}
         />
         <TextArea
           rows={2}
           value={templateDraft.notes}
-          placeholder="Notes"
+          placeholder="备注"
           onChange={(event) => setTemplateDraft((draft) => ({ ...draft, notes: event.target.value }))}
         />
         <div className="grid grid-cols-[1fr_auto] gap-2">
@@ -1270,7 +1270,7 @@ export default function App() {
             }
           >
             <Plus size={16} />
-            Add
+            添加
           </Button>
         </div>
         <div className="space-y-2">
@@ -1278,7 +1278,7 @@ export default function App() {
             const exercise = data.exercises.find((candidate) => candidate.id === item.exerciseId);
             return (
               <div key={`${item.exerciseId}-${index}`} className="rounded-[22px] border border-[#252525] bg-[#101010] p-3">
-                <div className="mb-2 text-sm font-medium text-white">{exercise?.name ?? 'Archived exercise'}</div>
+                <div className="mb-2 text-sm font-medium text-white">{exercise?.name ?? '已删除动作'}</div>
                 <div className="grid grid-cols-[82px_1fr_auto] gap-2">
                   <TextInput
                     type="number"
@@ -1293,7 +1293,7 @@ export default function App() {
                         ),
                       }))
                     }
-                    aria-label="sets"
+                    aria-label="默认组数"
                   />
                   <TextInput
                     value={item.repRange}
@@ -1305,7 +1305,7 @@ export default function App() {
                         ),
                       }))
                     }
-                    aria-label="rep range"
+                    aria-label="次数范围"
                   />
                   <IconButton
                     label="删除"
@@ -1326,9 +1326,9 @@ export default function App() {
         </div>
         <div className="flex gap-2">
           <Button variant="primary" onClick={saveTemplateDraft}>
-            {templateDraft.id ? 'Save Plan' : 'Create Plan'}
+            {templateDraft.id ? '保存模板' : '创建模板'}
           </Button>
-          <Button onClick={() => setTemplateDraft(emptyTemplateDraft)}>Clear</Button>
+          <Button onClick={() => setTemplateDraft(emptyTemplateDraft)}>清空</Button>
         </div>
       </Panel>
 
@@ -1337,7 +1337,7 @@ export default function App() {
           <div className="flex items-start justify-between gap-4">
             <div>
               <h3 className="text-[19px] font-semibold text-white">{template.name}</h3>
-              <p className="mt-1 text-sm text-[#8E8E93]">{template.exercises.length} exercises</p>
+              <p className="mt-1 text-sm text-[#8E8E93]">{template.exercises.length} 个动作</p>
             </div>
             <div className="flex gap-2">
               <IconButton
@@ -1372,7 +1372,7 @@ export default function App() {
               const exercise = data.exercises.find((candidate) => candidate.id === item.exerciseId);
               return (
                 <div key={`${template.id}-${item.exerciseId}-${index}`} className="flex justify-between gap-4 py-3 text-sm">
-                  <span className="truncate text-white">{exercise?.name ?? 'Archived exercise'}</span>
+                  <span className="truncate text-white">{exercise?.name ?? '已删除动作'}</span>
                   <span className="shrink-0 text-[#8E8E93]">
                     {item.defaultSets} × {item.repRange}
                   </span>
@@ -1393,9 +1393,9 @@ export default function App() {
 
     return (
       <div className="screen space-y-5">
-        <PageTitle title="Trends" subtitle="Simple progress curves for one movement at a time." />
+        <PageTitle title="数据趋势" subtitle="一次只看一个动作，把重量、容量和最佳表现看清楚。" />
         <Panel className="space-y-4">
-          <FieldLabel>Exercise</FieldLabel>
+          <FieldLabel>动作</FieldLabel>
           <SelectInput value={exercise.id} onChange={(event) => setAnalysisExerciseId(event.target.value)}>
             {visibleExercises.map((item) => (
               <option key={item.id} value={item.id}>
@@ -1404,19 +1404,19 @@ export default function App() {
             ))}
           </SelectInput>
           <div className="grid grid-cols-3 gap-5">
-            <NumberStat label="Sessions" value={`${trend.length}`} />
-            <NumberStat label="Top" value={`${fmt(Math.max(0, ...trend.map((item) => item.maxWeight)), 1)} ${exercise.defaultUnit}`} />
-            <NumberStat label="1RM" value={`${fmt(Math.max(0, ...trend.map((item) => item.estimated1RM)), 1)}`} />
+            <NumberStat label="次数" value={`${trend.length}`} />
+            <NumberStat label="最高" value={`${fmt(Math.max(0, ...trend.map((item) => item.maxWeight)), 1)} ${exercise.defaultUnit}`} />
+            <NumberStat label="估算 1RM" value={`${fmt(Math.max(0, ...trend.map((item) => item.estimated1RM)), 1)}`} />
           </div>
         </Panel>
 
         {trend.length === 0 ? (
           <Panel>
-            <p className="text-sm text-[#8E8E93]">Complete a workout with this exercise and trends will appear here.</p>
+            <p className="text-sm text-[#8E8E93]">完成包含这个动作的训练后，这里会出现趋势。</p>
           </Panel>
         ) : (
           <>
-            <ChartPanel title="Weight Progress" unit={exercise.defaultUnit}>
+            <ChartPanel title="重量趋势" unit={exercise.defaultUnit}>
               <ReLineChart data={trend} margin={{ top: 12, right: 8, bottom: 0, left: -24 }}>
                 <CartesianGrid stroke="#252525" strokeDasharray="4 8" vertical={false} />
                 <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={10} />
@@ -1425,7 +1425,7 @@ export default function App() {
                 <Line
                   type="monotone"
                   dataKey="maxWeight"
-                  name="Max Weight"
+                  name="最大重量"
                   stroke="#FFFFFF"
                   strokeWidth={2.5}
                   dot={{ r: 3, fill: '#FFFFFF', strokeWidth: 0 }}
@@ -1433,7 +1433,7 @@ export default function App() {
                 <Line
                   type="monotone"
                   dataKey="estimated1RM"
-                  name="Estimated 1RM"
+                  name="估算 1RM"
                   stroke="#8E8E93"
                   strokeWidth={1.5}
                   dot={false}
@@ -1441,7 +1441,7 @@ export default function App() {
               </ReLineChart>
             </ChartPanel>
 
-            <ChartPanel title="Volume" unit={exercise.defaultUnit}>
+            <ChartPanel title="总容量" unit={exercise.defaultUnit}>
               <AreaChart data={trend} margin={{ top: 12, right: 8, bottom: 0, left: -24 }}>
                 <CartesianGrid stroke="#252525" strokeDasharray="4 8" vertical={false} />
                 <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={10} />
@@ -1450,7 +1450,7 @@ export default function App() {
                 <Area
                   type="monotone"
                   dataKey="volume"
-                  name="Volume"
+                  name="总容量"
                   stroke="#FFFFFF"
                   fill="#FFFFFF"
                   fillOpacity={0.06}
@@ -1460,7 +1460,7 @@ export default function App() {
             </ChartPanel>
 
             <Panel>
-              <h2 className="text-[20px] font-semibold tracking-[-0.03em] text-white">Recent PR</h2>
+              <h2 className="text-[20px] font-semibold tracking-[-0.03em] text-white">近期最佳</h2>
               <div className="mt-4 divide-y divide-[#252525] border-t border-[#252525]">
                 {best.map((item) => (
                   <div key={item.workoutId} className="py-4">
@@ -1471,7 +1471,7 @@ export default function App() {
                       </span>
                     </div>
                     <div className="mt-1 text-sm text-[#8E8E93]">
-                      Best set {item.bestSet ? `${fmt(convertWeight(item.bestSet.weight, item.bestSet.unit, exercise.defaultUnit), 1)} ${exercise.defaultUnit} × ${item.bestSet.reps}` : 'No set'} · {fmt(item.volume)} volume
+                      最佳组 {item.bestSet ? `${fmt(convertWeight(item.bestSet.weight, item.bestSet.unit, exercise.defaultUnit), 1)} ${exercise.defaultUnit} × ${item.bestSet.reps}` : '暂无组'} · {fmt(item.volume)} 总容量
                     </div>
                   </div>
                 ))}
@@ -1490,7 +1490,7 @@ export default function App() {
           <div className="text-[13px] font-medium text-[#8E8E93]">Iron Ledger</div>
           <div className="flex items-center gap-2 rounded-full border border-[#252525] px-3 py-1.5 text-[12px] text-[#8E8E93]">
             <span className="h-1.5 w-1.5 rounded-full bg-white" />
-            Saved locally
+            本地已保存
           </div>
         </header>
 

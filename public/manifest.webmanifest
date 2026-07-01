@@ -1,6 +1,6 @@
 {
   "name": "Iron Ledger 健身记录",
-  "short_name": "Iron Ledger",
+  "short_name": "健身记录",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#0A0A0A",
